@@ -18,29 +18,27 @@ struct Interval
 };
 
 
-std::vector<Interval> createRandomIntervals(int count, int minValue = 0, int maxValue = 100) 
+std::vector<Interval> createRandomIntervals(int count, int minValue = 0, int maxValue = 100, int maxLength = 5) 
 {
-    std::vector<Interval> result;
 
 #if OFF
     std::random_device rd;
     std::mt19937 gen(rd());
 #endif
-
 #if ON
     static int seed = std::random_device{}();
     std::mt19937 gen(seed);
 #endif
 
-    std::uniform_int_distribution<> dist(minValue, maxValue);
+    std::uniform_int_distribution<int> startDis(minValue, maxValue);
+    std::uniform_int_distribution<int> lengthDis(0, maxLength);
 
-    for (int i = 0; i < count; i++) {
-        int start = dist(gen);
-        int end = dist(gen);
+    std::vector<Interval> result;
+    result.reserve(count);
 
-        if (start > end)
-            std::swap(start, end);
-
+    for (int i = 0; i < count; ++i) {
+        const int start = startDis(gen);
+        const int end = std::min(start + lengthDis(gen), maxValue);
         result.push_back({ start, end });
     }
 
@@ -137,7 +135,7 @@ std::vector<Interval> fastMergeIntresectionsInterval(std::vector<Interval>& inte
 
 int main(void)
 {
-    int count = 100, min = 1, max = 100;
+    int count = 100, min = 1, max = 100 * count, length = 278;
 
     std::cout << "Fast\n";
     std::vector<Interval> intervals1 = createRandomIntervals(count, min, max);
@@ -150,6 +148,10 @@ int main(void)
 
     std::cout << "Slow\n";
     std::vector<Interval> intervals2 = createRandomIntervals(count, min, max);
+    std::sort(intervals2.begin(), intervals2.end(),
+        [](const Interval& a, const Interval& b) {
+            return a.start < b.start;
+        });
     printIntervals("Initial", intervals2);
 
     slowMergeIntersectionsInterval(intervals2);
