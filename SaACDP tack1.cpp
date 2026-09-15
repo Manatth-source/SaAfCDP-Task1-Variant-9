@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <vector>
+#include <string>
 #include <algorithm>
 #include <random>
 #include <ctime>
@@ -22,14 +23,13 @@ std::vector<Interval> createRandomIntervals(int count, int minValue = 0, int max
     std::vector<Interval> result;
 
 #if OFF
-    //SRAND
     std::random_device rd;
     std::mt19937 gen(rd());
 #endif
 
 #if ON
-    //RAND
-    std::mt19937 gen(std::time(nullptr));
+    static int seed = std::random_device{}();
+    std::mt19937 gen(seed);
 #endif
 
     std::uniform_int_distribution<> dist(minValue, maxValue);
@@ -48,9 +48,9 @@ std::vector<Interval> createRandomIntervals(int count, int minValue = 0, int max
 }
 
 
-void printIntervals(const std::vector<Interval>& intervals)
+void printIntervals(const std::string& title, const std::vector<Interval>& intervals)
 {
-    std::cout << "Intervals:\n";
+    std::cout << title << ":\n";
 
     for (Interval interval : intervals)
         std::cout << '{' << interval.start << ", " << interval.end << "} ";
@@ -137,21 +137,21 @@ std::vector<Interval> fastMergeIntresectionsInterval(std::vector<Interval>& inte
 
 int main(void)
 {
-    int count = 3, min = 1, max = 100;
+    int count = 100, min = 1, max = 100;
 
     std::cout << "Fast\n";
     std::vector<Interval> intervals1 = createRandomIntervals(count, min, max);
-    printIntervals(intervals1);
+    printIntervals("Initial", intervals1);
 
     intervals1 = fastMergeIntresectionsInterval(intervals1);
-    printIntervals(intervals1);
+    printIntervals("Result", intervals1);
 
     std::cout << '\n';
 
     std::cout << "Slow\n";
     std::vector<Interval> intervals2 = createRandomIntervals(count, min, max);
-    printIntervals(intervals2);
+    printIntervals("Initial", intervals2);
 
     slowMergeIntersectionsInterval(intervals2);
-    printIntervals(intervals2);
+    printIntervals("Result", intervals2);
 }
